@@ -59,7 +59,7 @@
 #define  CcspHalEthSwTrace(msg)                     printf("%s - ", __FUNCTION__); printf msg;
 #define MAX_BUF_SIZE 1024
 #define MACADDRESS_SIZE 6
-#define ETH_WAN_INTERFACE  "eth8"
+#define ETH_WAN_INTERFACE  "erouter0"
 #define LM_ARP_ENTRY_FORMAT  "%63s %63s %63s %63s %17s %63s"
 
 #if defined(FEATURE_RDKB_WAN_MANAGER)
@@ -201,14 +201,39 @@ INT
  )
 {
     CcspHalEthSwTrace(("%s called\n", __func__));
-    //Maxsize param should be minimum 4charecters(eth0) including NULL charecter	
-    if( ( Interface == NULL ) || ( maxSize < ( strlen( ETH_WAN_IFNAME ) + 1 ) ) )
+    FILE *fp;
+    char temp_ifname[20] = {0};
+    const char *nvram_file = "/nvram/wan_ifname";
+
+    if (!Interface || maxSize == 0)
+        return RETURN_ERR;
+
+    fp = fopen(nvram_file, "r");
+    if (!fp)
     {
-        printf("ERROR: Invalid argument. \n");
+        CcspHalEthSwTrace(("Failed to open %s\n", nvram_file));
         return RETURN_ERR;
     }
 
-    snprintf(Interface, maxSize, "%s", ETH_WAN_IFNAME);
+    if (!fgets(temp_ifname, sizeof(temp_ifname), fp))
+    {
+        fclose(fp);
+        return RETURN_ERR;
+    }
+
+    fclose(fp);
+
+    temp_ifname[strcspn(temp_ifname, "\n")] = '\0';
+
+    if (strlen(temp_ifname) == 0)
+        return RETURN_ERR;
+
+    if (strlen(temp_ifname) + 1 > maxSize)
+        return RETURN_ERR;
+
+    strncpy((char*)Interface, temp_ifname, maxSize - 1);
+    Interface[maxSize - 1] = '\0';
+
     return RETURN_OK;
 }
 #endif
@@ -1092,6 +1117,7 @@ bool rpiNet_isInterfaceLinkUp(const char *ifname)
         isUp = 0;
     } else {
         isUp = (intf.ifr_flags & (IFF_RUNNING | IFF_LOWER_UP)) ? TRUE : FALSE;
+
     }
 
     close(skfd);
