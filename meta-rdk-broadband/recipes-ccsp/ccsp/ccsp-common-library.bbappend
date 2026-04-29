@@ -35,8 +35,8 @@ SRC_URI:append = " file://0003-meta-rdk-bsp-arm-only-remove-pre-and-post-start-c
 
 # Modify CcspEthAgent systemd unit to use systemd notifications,
 # and RdkWanManager wait for CcspEthAgent's notify event
-SRC_URI:append = " file://0004-systemd-ccsp-eth-agent-sd-notify.patch"
-SRC_URI:append = " file://0005-systemd-rdk-wan-manager-eth-agent.patch"
+#SRC_URI:append = " file://0004-systemd-ccsp-eth-agent-sd-notify.patch"
+#SRC_URI:append = " file://0005-systemd-rdk-wan-manager-eth-agent.patch"
 
 do_configure:prepend:aarch64() {
 	sed -e '/len/ s/^\/*/\/\//' -i ${S}/source/ccsp/components/common/DataModel/dml/components/DslhObjRecord/dslh_objro_access.c
@@ -177,7 +177,7 @@ SYSTEMD_SERVICE:${PN}:append = " ProcessResetDetect.path"
 SYSTEMD_SERVICE:${PN}:append = " ProcessResetDetect.service"
 SYSTEMD_SERVICE:${PN}:append = " rfc.service"
 SYSTEMD_SERVICE_${PN}:remove = " utopia.service"
-SYSTEMD_SERVICE_${PN}:append = "gwprovapp.service"
+SYSTEMD_SERVICE_${PN}:append = " gwprovapp.service"
 SYSTEMD_SERVICE:${PN}:append = " notifyComp.service"
 SYSTEMD_SERVICE:${PN}:append = " CcspXdnsSsp.service"
 SYSTEMD_SERVICE:${PN}:append = " wan-initialized.path"
@@ -186,6 +186,7 @@ SYSTEMD_SERVICE:${PN}:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'fwupgr
 SYSTEMD_SERVICE:${PN}:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'OneWifi', 'onewifi.service ', 'ccspwifiagent.service', d)}"
 SYSTEMD_SERVICE:${PN}:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'webconfig_bin', 'webconfig.service', '', d)}"
 SYSTEMD_SERVICE:${PN}:append = " brlan0_check.service"
+SYSTEMD_SERVICE:${PN}:append = " CcspTelemetry.service"
 
 FILES:${PN}:append = " \
     /usr/ccsp/ccspSysConfigEarly.sh \

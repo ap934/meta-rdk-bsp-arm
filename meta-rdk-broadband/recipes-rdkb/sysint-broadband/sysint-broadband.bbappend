@@ -60,6 +60,32 @@ do_install:append() {
 
     sed -i "/if \[ \! -f \/usr\/bin\/GetConfigFile \]\;then/,+4d" ${D}/rdklogger/logfiles.sh
 
+    # Changing CLOUDURL and DCM_LOG_SERVER_URL values with migrated server
+    install -m 0755 ${S}/devicegenericarm/systemd_units/previous-log-backup.service ${D}${systemd_unitdir}/system
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/backupLogs.sh ${D}${base_libdir}/rdk
+    sed -i -e 's/LOG_SERVER=.*$/LOG_SERVER=xconf.rdkcentral.com/' ${D}${sysconfdir}/dcm.properties
+    sed -i -e 's/DCM_LOG_SERVER=.*$/DCM_LOG_SERVER=https:\/\/xconf.rdkcentral.com\/xconf\/logupload.php/' ${D}${sysconfdir}/dcm.properties
+    sed -i -e 's/DCM_SCP_SERVER=.*$/DCM_SCP_SERVER=xconf.rdkcentral.com/' ${D}${sysconfdir}/dcm.properties
+    sed -i -e 's/HTTP_UPLOAD_LINK=.*$/HTTP_UPLOAD_LINK=https:\/\/xconf.rdkcentral.com\/xconf\/telemetry_upload.php/' ${D}${sysconfdir}/dcm.properties
+    sed -i -e 's/DCA_UPLOAD_URL=.*$/DCA_UPLOAD_URL=xconf.rdkcentral.com/' ${D}${sysconfdir}/dcm.properties
+    echo "DCM_HTTP_SERVER_URL="https://xconf.rdkcentral.com/xconf/telemetry_upload.php"" >> ${D}${sysconfdir}/dcm.properties
+    echo "DCM_LA_SERVER_URL="https://xconf.rdkcentral.com/xconf/logupload.php"" >> ${D}${sysconfdir}/dcm.properties
+
+    install -m 0755 ${S}/getaccountid.sh   ${D}${base_libdir}/rdk
+    echo "CLOUDURL="https://xconf.rdkcentral.com/xconf/swu/stb?eStbMac="" >> ${D}${sysconfdir}/include.properties
+    sed -i -e 's|^DCM_LOG_SERVER_URL=.*$|DCM_LOG_SERVER_URL=https://xconf.rdkcentral.com/loguploader/getSettings|' ${D}${sysconfdir}/dcm.properties
+
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/StartDCM.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/DCMscript.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/uploadSTBLogs.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/interfaceCalls.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/commonUtils.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/logfiles.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/backupLogs.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/snmpUtils.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/dcaSplunkUpload.sh ${D}${base_libdir}/rdk
+    install -m 0755 ${S}/devicegenericarm/lib/rdk/dca_utility.sh ${D}${base_libdir}/rdk
+
     #self heal support
     install -d ${D}/usr/ccsp/tad
     install -m 0755 ${S}/devicegenericarm/lib/rdk/corrective_action.sh ${D}/usr/ccsp/tad

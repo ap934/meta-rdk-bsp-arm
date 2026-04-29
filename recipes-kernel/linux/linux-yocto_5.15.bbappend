@@ -3,6 +3,7 @@ LINUX_VERSION = "5.15.162"
 
 ARMFILESPATHS := "${THISDIR}/${PN}-5.15:"
 FILESEXTRAPATHS:prepend:armefi64 = "${ARMFILESPATHS}"
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
 # Patches against the generic 5.15 kernel
 SRC_URI:append:armefi64 = " \
@@ -11,6 +12,8 @@ SRC_URI:append:armefi64 = " \
     file://02_dpaa2_add_more_10G_modes.patch \
     file://03_rk3568-pcie-phy-backports.patch \
     "
+SRC_URI:append = "file://0001-add-support-for-port-triggering.patch \
+                  file://port_triggering.patch"
 
 RDKBFILESPATHS := "${THISDIR}/rdkb:"
 FILESEXTRAPATHS:prepend:broadband = "${RDKBFILESPATHS}"
