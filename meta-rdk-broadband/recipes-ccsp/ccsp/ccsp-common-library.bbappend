@@ -17,6 +17,7 @@ SRC_URI:append = " \
     file://brlan0_check.sh \
     file://brlan0_check.service \
     file://onewifi.service \
+    file://gwprovapp.conf \
 "
 
 # Some systemd unit files invoke through '/bin/sh -c (...)' which causes
@@ -74,6 +75,13 @@ do_install:append:class-target () {
     install -D -m 0644 ${S}/systemd_units/notifyComp.service ${D}${systemd_unitdir}/system/notifyComp.service
     install -D -m 0644 ${S}/systemd_units/CcspTelemetry.service ${D}${systemd_unitdir}/system/CcspTelemetry.service
 
+    #webpa service
+    install -D -m 0644 ${S}/systemd_units/parodus.service ${D}${systemd_unitdir}/system/parodus.service
+    install -D -m 0644 ${S}/systemd_units/webpa.service ${D}${systemd_unitdir}/system/webpa.service
+    sed -i 's/parodusCmd.cmd &/parodusCmd.cmd/' ${D}${systemd_unitdir}/system/parodus.service
+    sed -i '/ExecStart=/a ExecStartPost\=\sysevent set webserver started'  ${D}${systemd_unitdir}/system/parodus.service
+    sed -i "/WorkingDirectory=/a ExecStartPre\=\/bin/sh -c '\/lib/rdk/webpa_pre_setup.sh'\\;" ${D}${systemd_unitdir}/system/webpa.service
+    
     #rfc service file
     install -D -m 0644 ${S}/systemd_units/rfc.service ${D}${systemd_unitdir}/system/rfc.service
 
@@ -89,7 +97,10 @@ do_install:append:class-target () {
 
     sed -i -- 's/NotifyAccess=.*/#NotifyAccess=main/g' ${D}${systemd_unitdir}/system/CcspCrSsp.service
     sed -i -- 's/notify.*/forking/g' ${D}${systemd_unitdir}/system/CcspCrSsp.service
-    
+    # Install gwprov app conf
+    install -D -m 0644 ${S}/systemd_units/gwprovapp.service ${D}${systemd_unitdir}/system/gwprovapp.service
+    install -D -m 0644 ${WORKDIR}/gwprovapp.conf ${D}${systemd_unitdir}/system/gwprovapp.service.d/gwprovapp.conf
+    sed -i -e '/ConditionPathExists/d' ${D}${systemd_unitdir}/system/gwprovapp.service
     #copy rfc.properties into nvram
     sed -i '/ExecStartPre/ a\ExecStartPre=-/bin/cp /etc/rfc.properties /nvram/' ${D}${systemd_unitdir}/system/rfc.service
     sed -i 's#${PARODUS_START_LOG_FILE}#/rdklogs/logs/dcmrfc.log#g' ${D}${systemd_unitdir}/system/rfc.service
@@ -119,6 +130,9 @@ do_install:append:class-target () {
      DISTRO_WAN_ENABLED="${@bb.utils.contains('DISTRO_FEATURES','rdkb_wan_manager','true','false',d)}"
      if [ $DISTRO_WAN_ENABLED = 'true' ]; then
      install -D -m 0644 ${S}/systemd_units/RdkWanManager.service ${D}${systemd_unitdir}/system/RdkWanManager.service
+     sed -i "/WorkingDirectory/a ExecStartPre=/bin/sh /lib/rdk/run_rm_key.sh" ${D}${systemd_unitdir}/system/RdkWanManager.service
+     sed -i "s/After=CcspCrSsp.service/After=CcspCrSsp.service utopia.service /g" ${D}${systemd_unitdir}/system/RdkWanManager.service
+     sed -i "s/CcspPandMSsp.service/CcspCrSsp.service CcspPandMSsp.service/g" ${D}${systemd_unitdir}/system/CcspEthAgent.service
      install -D -m 0644 ${WORKDIR}/utopia.service ${D}${systemd_unitdir}/system/utopia.service
      install -D -m 0644 ${S}/systemd_units/RdkVlanManager.service ${D}${systemd_unitdir}/system/RdkVlanManager.service
      fi
@@ -154,6 +168,7 @@ fi' ${D}/usr/ccsp/ccspPAMCPCheck.sh
         fi
     fi
 
+    rm -f ${D}${systemd_unitdir}/system/utopia.service
 }
 
 SYSTEMD_SERVICE:${PN}:append = " CcspCrSsp.service"
@@ -168,6 +183,8 @@ SYSTEMD_SERVICE:${PN}:append = " CcspEthAgent.service"
 SYSTEMD_SERVICE:${PN}:append = " ProcessResetDetect.path"
 SYSTEMD_SERVICE:${PN}:append = " ProcessResetDetect.service"
 SYSTEMD_SERVICE:${PN}:append = " rfc.service"
+SYSTEMD_SERVICE_${PN}:remove = " utopia.service"
+SYSTEMD_SERVICE_${PN}:append = " gwprovapp.service"
 SYSTEMD_SERVICE:${PN}:append = " notifyComp.service"
 SYSTEMD_SERVICE:${PN}:append = " CcspXdnsSsp.service"
 SYSTEMD_SERVICE:${PN}:append = " wan-initialized.path"
@@ -176,6 +193,12 @@ SYSTEMD_SERVICE:${PN}:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'fwupgr
 SYSTEMD_SERVICE:${PN}:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'OneWifi', 'onewifi.service ', 'ccspwifiagent.service', d)}"
 SYSTEMD_SERVICE:${PN}:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'webconfig_bin', 'webconfig.service', '', d)}"
 SYSTEMD_SERVICE:${PN}:append = " brlan0_check.service"
+<<<<<<< HEAD
+SYSTEMD_SERVICE:${PN}:append = " CcspTelemetry.service"
+=======
+SYSTEMD_SERVICE:${PN}:append = " parodus.service"
+SYSTEMD_SERVICE:${PN}:append = " webpa.service"
+>>>>>>> cd9e688 (Add webpa feature in ARM system Ready)
 
 FILES:${PN}:append = " \
     /usr/ccsp/ccspSysConfigEarly.sh \
@@ -203,6 +226,13 @@ FILES:${PN}:append = " \
     ${systemd_unitdir}/system/CcspXdnsSsp.service \
     ${systemd_unitdir}/system/wan-initialized.target \
     ${systemd_unitdir}/system/wan-initialized.path \
+<<<<<<< HEAD
+    ${systemd_unitdir}/system/gwprovapp.service \
+    ${systemd_unitdir}/system/gwprovapp.service.d/gwprovapp.conf \
+=======
+    ${systemd_unitdir}/system/parodus.service \
+    ${systemd_unitdir}/system/webpa.service \
+>>>>>>> cd9e688 (Add webpa feature in ARM system Ready)
 "
 FILES:${PN}:append = "${@bb.utils.contains('DISTRO_FEATURES', 'rdkb_wan_manager', ' ${systemd_unitdir}/system/RdkWanManager.service ${systemd_unitdir}/system/utopia.service ${systemd_unitdir}/system/RdkVlanManager.service  ', '', d)}"
 FILES:${PN}:append = "${@bb.utils.contains('DISTRO_FEATURES', 'fwupgrade_manager', ' ${systemd_unitdir}/system/RdkFwUpgradeManager.service ', '', d)}"

@@ -10,7 +10,6 @@ usr/bin/xcal-device \
 usr/bin/CcspEPONAgentSsp \
 usr/lib/libepon_tr181.so* \
 usr/ccsp/epon \
-usr/bin/parodusStart \
 usr/lib/libgupnp-1.2.so.0* \
 usr/bin/smartctl \
 usr/bin/smartd \
@@ -33,19 +32,12 @@ usr/bin/spawn-fcgi \
 usr/bin/expect_* \
 usr/bin/conntrack_* \
 rdklogger/init-zram.sh \
-rdklogger/DCMscript.sh \
 rdklogger/RfcRebootCronschedule.sh \
 rdklogger/rfc_refresh.sh \
 rdklogger/apply_partner_customization.sh \
-rdklogger/getpartnerid.sh \
-rdklogger/getaccountid.sh \
 rdklogger/utils.sh \
 rdklogger/startTunnel.sh \
-rdklogger/dca_utility.sh \
-rdklogger/dcaSplunkUpload.sh \
 rdklogger/wan_ssh.sh \
-rdklogger/DCMCronreschedule.sh \
-rdklogger/telemetryEventListener.sh \
 rdklogger/flush_logs_atom.sh \
 rdklogger/getip_file.sh \
 rdklogger/getipv6_container.sh \
