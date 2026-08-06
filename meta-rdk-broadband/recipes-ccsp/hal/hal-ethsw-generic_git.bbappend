@@ -2,6 +2,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/hal-ethsw-generic:"
 
 SRC_URI:append = " \
        file://ccsp_hal_ethsw.c \
+       file://vlan-manager-integration.patch \
 "
 
 DEPENDS += "libnl"
