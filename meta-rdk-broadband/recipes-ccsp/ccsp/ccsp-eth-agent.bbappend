@@ -16,6 +16,7 @@ SRC_URI:append = "\
 # For systemd notifications
 
 CFLAGS:append = " -DUSE_SYSTEMD_NOTIFICATIONS"
+CFLAGS_append = "${@bb.utils.contains('DISTRO_FEATURES', 'vlan_manager' , ' -DFEATURE_RDKB_VLAN_MANAGER ','', d)}"
 DEPENDS:append = " systemd"
 LDFLAGS:append = " -lsystemd"
 
