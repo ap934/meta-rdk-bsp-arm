@@ -67,10 +67,8 @@ do_install:append:class-target () {
     install -D -m 0644 ${S}/systemd_units/parodus.service ${D}${systemd_unitdir}/system/parodus.service
     sed -i 's/parodusCmd.cmd &/parodusCmd.cmd/' ${D}${systemd_unitdir}/system/parodus.service
     sed -i '/ExecStart=/a ExecStartPost\=\sysevent set webserver started'  ${D}${systemd_unitdir}/system/parodus.service
-    sed -i "s/wan-initialized.target/multi-user.target/g" ${D}${systemd_unitdir}/system/parodus.service
     install -D -m 0644 ${S}/systemd_units/webpa.service ${D}${systemd_unitdir}/system/webpa.service
     sed -i "/WorkingDirectory=/a ExecStartPre\=\/bin/sh -c '\/lib/rdk/webpa_pre_setup.sh'\\;" ${D}${systemd_unitdir}/system/webpa.service
-    sed -i "s/wan-initialized.target/multi-user.target/g" ${D}${systemd_unitdir}/system/webpa.service
     fi
     
     #rfc service file
@@ -95,7 +93,6 @@ do_install:append:class-target () {
     sed -i 's/rfc.service /RFCbase.sh /g' ${D}${systemd_unitdir}/system/rfc.service
     #reduce sleep time to 12 sconds
     sed -i 's/300/12/g' ${D}${systemd_unitdir}/system/rfc.service
-    sed -i "s/wan-initialized.target/multi-user.target/g" ${D}${systemd_unitdir}/system/rfc.service
 
     sed -i "/device.properties/a ExecStartPre=/bin/sh -c '(/usr/ccsp/utopiaInitCheck.sh)'"  ${D}${systemd_unitdir}/system/CcspPandMSsp.service
     #sed -i "/Description=CcspCrSsp service/a After=disable_systemd_restart_param.service" ${D}${systemd_unitdir}/system/CcspCrSsp.service
@@ -109,7 +106,6 @@ do_install:append:class-target () {
      sed -i "/EnvironmentFile=\/etc\/device.properties/a EnvironmentFile=\/etc\/dcm.properties" ${D}${systemd_unitdir}/system/CcspTelemetry.service
      sed -i "/EnvironmentFile=\/etc\/dcm.properties/a ExecStartPre=\/bin\/sh -c '\/bin\/touch \/rdklogs\/logs\/dcmscript.log'" ${D}${systemd_unitdir}/system/CcspTelemetry.service
      sed -i "s/ExecStart=\/bin\/sh -c '\/lib\/rdk\/dcm.service \&'/ExecStart=\/bin\/sh -c '\/lib\/rdk\/StartDCM.sh \>\> \/rdklogs\/logs\/telemetry.log \&'/g" ${D}${systemd_unitdir}/system/CcspTelemetry.service
-     sed -i "s/wan-initialized.target/multi-user.target/g" ${D}${systemd_unitdir}/system/CcspTelemetry.service
      fi
      install -D -m 0644 ${S}/systemd_units/CcspXdnsSsp.service ${D}${systemd_unitdir}/system/CcspXdnsSsp.service
 
@@ -125,12 +121,6 @@ do_install:append:class-target () {
          install -D -m 0644 ${S}/systemd_units/RdkFwUpgradeManager.service ${D}${systemd_unitdir}/system/RdkFwUpgradeManager.service
      fi
 
-     ##### erouter0 ip issue
-    sed -i '/Factory/a \
-IsErouterRunningStatus=\`ifconfig erouter0 | grep RUNNING | grep -v grep | wc -l\` \
-if [ \"\$IsErouterRunningStatus\" == 0 ]; then \
-ethtool -s erouter0 speed 1000 \
-fi' ${D}/usr/ccsp/ccspPAMCPCheck.sh
 
      DISTRO_OneWiFi_ENABLED="${@bb.utils.contains('DISTRO_FEATURES','OneWifi','true','false',d)}"
      if [ $DISTRO_OneWiFi_ENABLED = 'true' ]; then
